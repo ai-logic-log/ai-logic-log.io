@@ -1,174 +1,449 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 사용 기록 시스템</title>
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f9;
-  margin:0;
-  padding:0;
-}
-header{
-  background:#1e2a38;
-  color:white;
-  padding:20px;
-  text-align:center;
-  font-size:20px;
-}
-.container{
-  padding:30px;
-  max-width:900px;
-  margin:auto;
-}
-button{
-  padding:10px 15px;
-  margin:5px;
-  border:none;
-  background:#1e2a38;
-  color:white;
-  cursor:pointer;
-  border-radius:5px;
-}
-input, textarea{
-  width:100%;
-  padding:8px;
-  margin:5px 0 15px 0;
-}
-.hidden{display:none;}
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-th, td{
-  border:1px solid #ccc;
-  padding:8px;
-  text-align:center;
-}
-</style>
-</head>
-<body>
+import React, { useState, useEffect } from 'react';
+import { 
+  User, 
+  ShieldCheck, 
+  ArrowLeft, 
+  ClipboardCheck, 
+  FileText, 
+  Wrench, 
+  CheckCircle2,
+  Lock,
+  LogOut,
+  Search,
+  LayoutDashboard
+} from 'lucide-react';
 
-<header>
-생성형 AI 사용 기록 시스템
-</header>
-
-<div class="container">
-
-<div id="home">
-  <button onclick="showStudent()">학생 모드</button>
-  <button onclick="showProfessor()">교수 모드</button>
-</div>
-
-<div id="student" class="hidden">
-<h3>📘 생성형 AI 도구 활용 방침</h3>
-<p>AI는 사고를 대체하는 도구가 아닌 보조 수단입니다. 그대로 제출 시 낙제 처리됩니다.</p>
-<label><input type="checkbox" id="agree"> 위 내용을 이해했습니다.</label>
-
-<h3>기록 작성</h3>
-<input type="text" id="name" placeholder="이름">
-<input type="text" id="studentId" placeholder="학번">
-<input type="text" id="assignment" placeholder="과제명">
-
-<label>AI 사용 여부</label>
-<select id="aiUsed">
-  <option value="사용안함">사용안함</option>
-  <option value="사용함">사용함</option>
-</select>
-
-<input type="text" id="tool" placeholder="사용한 AI 도구">
-<textarea id="purpose" placeholder="사용 목적"></textarea>
-<textarea id="applied" placeholder="실제 반영 부분"></textarea>
-
-<button onclick="saveData()">제출</button>
-<button onclick="goHome()">뒤로가기</button>
-</div>
-
-<div id="professor" class="hidden">
-<h3>🔒 교수 모드</h3>
-<input type="password" id="password" placeholder="비밀번호 입력">
-<button onclick="checkPassword()">입장</button>
-
-<div id="adminPanel" class="hidden">
-<h3>제출 목록</h3>
-<table>
-<thead>
-<tr>
-<th>이름</th>
-<th>학번</th>
-<th>과제명</th>
-<th>AI사용</th>
-</tr>
-</thead>
-<tbody id="tableBody"></tbody>
-</table>
-<button onclick="goHome()">뒤로가기</button>
-</div>
-</div>
-
-</div>
-
-<script>
-function showStudent(){
-  home.classList.add("hidden");
-  student.classList.remove("hidden");
-}
-function showProfessor(){
-  home.classList.add("hidden");
-  professor.classList.remove("hidden");
-}
-function goHome(){
-  location.reload();
-}
-
-function saveData(){
-  if(!agree.checked){
-    alert("방침에 동의해야 합니다.");
-    return;
-  }
-
-  let data = {
-    name:name.value,
-    studentId:studentId.value,
-    assignment:assignment.value,
-    aiUsed:aiUsed.value,
-    tool:tool.value,
-    purpose:purpose.value,
-    applied:applied.value
-  }
-
-  let logs = JSON.parse(localStorage.getItem("aiLogs")) || [];
-  logs.push(data);
-  localStorage.setItem("aiLogs", JSON.stringify(logs));
-  alert("제출 완료!");
-  location.reload();
-}
-
-function checkPassword(){
-  if(password.value === "1234"){
-    adminPanel.classList.remove("hidden");
-    loadTable();
-  }else{
-    alert("비밀번호 오류");
-  }
-}
-
-function loadTable(){
-  let logs = JSON.parse(localStorage.getItem("aiLogs")) || [];
-  let html="";
-  logs.forEach(l=>{
-    html+=`<tr>
-    <td>${l.name}</td>
-    <td>${l.studentId}</td>
-    <td>${l.assignment}</td>
-    <td>${l.aiUsed}</td>
-    </tr>`
+const App = () => {
+  const [view, setView] = useState('home'); // home, student, professor, admin
+  const [password, setPassword] = useState('');
+  const [logs, setLogs] = useState([]);
+  const [statusMessage, setStatusMessage] = useState(null);
+  
+  // 학생용 폼 상태
+  const [formData, setFormData] = useState({
+    name: '',
+    studentId: '',
+    assignment: '',
+    aiUsed: '사용안함',
+    tool: '',
+    purpose: '',
+    applied: '',
+    agree: false
   });
-  tableBody.innerHTML = html;
-}
-</script>
 
-</body>
-</html>
+  // 초기 데이터 로드
+  useEffect(() => {
+    const savedLogs = JSON.parse(localStorage.getItem('aiLogs')) || [];
+    setLogs(savedLogs);
+  }, []);
+
+  // 상태 메시지 자동 제거
+  useEffect(() => {
+    if (statusMessage) {
+      const timer = setTimeout(() => setStatusMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [statusMessage]);
+
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const saveLog = () => {
+    if (!formData.agree) {
+      setStatusMessage({ type: 'error', text: '방침에 동의해야 제출이 가능합니다.' });
+      return;
+    }
+    if (!formData.name || !formData.studentId || !formData.assignment) {
+      setStatusMessage({ type: 'error', text: '필수 항목(이름, 학번, 과제명)을 입력해주세요.' });
+      return;
+    }
+
+    const newLogs = [...logs, { ...formData, id: Date.now(), date: new Date().toLocaleString() }];
+    setLogs(newLogs);
+    localStorage.setItem('aiLogs', JSON.stringify(newLogs));
+    
+    setStatusMessage({ type: 'success', text: '기록이 성공적으로 제출되었습니다!' });
+    
+    // 폼 초기화 및 홈으로 이동
+    setTimeout(() => {
+      setFormData({
+        name: '',
+        studentId: '',
+        assignment: '',
+        aiUsed: '사용안함',
+        tool: '',
+        purpose: '',
+        applied: '',
+        agree: false
+      });
+      setView('home');
+    }, 1500);
+  };
+
+  const handleAdminLogin = () => {
+    if (password === '1234') {
+      setView('admin');
+      setPassword('');
+    } else {
+      setStatusMessage({ type: 'error', text: '비밀번호가 일치하지 않습니다.' });
+    }
+  };
+
+  const deleteLog = (id) => {
+    const filtered = logs.filter(log => log.id !== id);
+    setLogs(filtered);
+    localStorage.setItem('aiLogs', JSON.stringify(filtered));
+  };
+
+  // 뷰 전환 애니메이션 클래스
+  const fadeClass = "animate-in fade-in duration-500";
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      {/* Header */}
+      <header className="bg-slate-900 text-white py-6 px-4 shadow-lg sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-500 p-2 rounded-lg">
+              <LayoutDashboard size={24} />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight">생성형 AI 사용 기록 시스템</h1>
+          </div>
+          {view !== 'home' && (
+            <button 
+              onClick={() => setView('home')}
+              className="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
+            >
+              <ArrowLeft size={16} /> 홈으로
+            </button>
+          )}
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto p-6">
+        {/* Status Toast */}
+        {statusMessage && (
+          <div className={`fixed top-24 right-6 z-50 p-4 rounded-xl shadow-2xl flex items-center gap-3 border ${
+            statusMessage.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+          } animate-in slide-in-from-right duration-300`}>
+            {statusMessage.type === 'success' ? <CheckCircle2 size={20} /> : <ShieldCheck size={20} />}
+            <span className="font-medium">{statusMessage.text}</span>
+          </div>
+        )}
+
+        {/* Home View */}
+        {view === 'home' && (
+          <div className={`grid md:grid-cols-2 gap-8 mt-12 ${fadeClass}`}>
+            <button 
+              onClick={() => setView('student')}
+              className="group bg-white p-10 rounded-3xl shadow-sm border border-slate-100 hover:border-indigo-500 hover:shadow-xl hover:shadow-indigo-500/10 transition-all text-left"
+            >
+              <div className="bg-indigo-100 text-indigo-600 p-4 rounded-2xl w-fit mb-6 group-hover:scale-110 transition-transform">
+                <User size={40} strokeWidth={1.5} />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">학생 모드</h2>
+              <p className="text-slate-500 leading-relaxed">AI 활용 기록을 작성하고 제출합니다. 투명한 학습 문화를 함께 만듭니다.</p>
+              <div className="mt-8 flex items-center text-indigo-600 font-semibold gap-2">
+                기록 작성하기 <ArrowLeft className="rotate-180" size={18} />
+              </div>
+            </button>
+
+            <button 
+              onClick={() => setView('professor')}
+              className="group bg-white p-10 rounded-3xl shadow-sm border border-slate-100 hover:border-slate-800 hover:shadow-xl hover:shadow-slate-800/10 transition-all text-left"
+            >
+              <div className="bg-slate-100 text-slate-800 p-4 rounded-2xl w-fit mb-6 group-hover:scale-110 transition-transform">
+                <ShieldCheck size={40} strokeWidth={1.5} />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">교수 모드</h2>
+              <p className="text-slate-500 leading-relaxed">학생들이 제출한 AI 사용 리포트를 확인하고 관리합니다. (비밀번호 필요)</p>
+              <div className="mt-8 flex items-center text-slate-800 font-semibold gap-2">
+                관리자 로그인 <ArrowLeft className="rotate-180" size={18} />
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* Student View */}
+        {view === 'student' && (
+          <div className={`${fadeClass} max-w-2xl mx-auto`}>
+            <div className="bg-indigo-900 text-white p-8 rounded-3xl mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <FileText size={24} className="text-indigo-300" />
+                <h2 className="text-xl font-bold italic tracking-wide">AI Ethics Guidelines</h2>
+              </div>
+              <p className="text-indigo-100 leading-relaxed mb-6">
+                생성형 AI는 사고를 돕는 보조 도구입니다. AI의 결과물을 그대로 제출하거나 본인의 노력 없이 복사하는 행위는 학업 부정행위에 해당할 수 있음을 유의하십시오.
+              </p>
+              <label className="flex items-center gap-3 cursor-pointer select-none bg-white/10 p-4 rounded-xl hover:bg-white/20 transition-colors">
+                <input 
+                  type="checkbox" 
+                  id="agree"
+                  checked={formData.agree}
+                  onChange={handleInputChange}
+                  className="w-5 h-5 rounded accent-indigo-400" 
+                />
+                <span className="text-sm font-medium">위 방침을 숙지하였으며 정직하게 제출할 것을 약속합니다.</span>
+              </label>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 space-y-6">
+              <h3 className="text-lg font-bold border-b pb-4 text-slate-800">기록지 작성</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-600 ml-1">이름</label>
+                  <input 
+                    id="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                    placeholder="홍길동"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-600 ml-1">학번</label>
+                  <input 
+                    id="studentId"
+                    value={formData.studentId}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                    placeholder="20240001"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-600 ml-1">과제명</label>
+                <input 
+                  id="assignment"
+                  value={formData.assignment}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                  placeholder="컴퓨터공학 입문 중간 과제"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-600 ml-1">AI 사용 여부</label>
+                  <select 
+                    id="aiUsed"
+                    value={formData.aiUsed}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none bg-white"
+                  >
+                    <option value="사용안함">사용안함</option>
+                    <option value="사용함">사용함</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-600 ml-1">사용한 도구</label>
+                  <input 
+                    id="tool"
+                    disabled={formData.aiUsed === '사용안함'}
+                    value={formData.tool}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400" 
+                    placeholder="ChatGPT, Claude 등"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-600 ml-1 flex items-center gap-1">
+                  사용 목적 <span className="text-xs font-normal text-slate-400">(선택)</span>
+                </label>
+                <textarea 
+                  id="purpose"
+                  disabled={formData.aiUsed === '사용안함'}
+                  value={formData.purpose}
+                  onChange={handleInputChange}
+                  rows="2"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 resize-none" 
+                  placeholder="아이디어 구상, 코드 디버깅 등..."
+                ></textarea>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-600 ml-1 flex items-center gap-1">
+                  실제 반영 내용 <span className="text-xs font-normal text-slate-400">(선택)</span>
+                </label>
+                <textarea 
+                  id="applied"
+                  disabled={formData.aiUsed === '사용안함'}
+                  value={formData.applied}
+                  onChange={handleInputChange}
+                  rows="3"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:bg-slate-50 disabled:text-slate-400 resize-none" 
+                  placeholder="보고서 서론의 개요 작성 시 AI의 제안을 참고하여 수정 반영함"
+                ></textarea>
+              </div>
+
+              <button 
+                onClick={saveLog}
+                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-lg shadow-indigo-600/20"
+              >
+                리포트 제출 완료
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Professor Login View */}
+        {view === 'professor' && (
+          <div className={`${fadeClass} max-w-sm mx-auto mt-20`}>
+            <div className="bg-white p-8 rounded-3xl shadow-2xl border border-slate-100 text-center">
+              <div className="bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Lock size={28} className="text-slate-800" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">교수 로그인</h2>
+              <p className="text-slate-500 mb-8 text-sm">시스템 관리를 위해 비밀번호를 입력하세요.</p>
+              
+              <input 
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+                className="w-full px-4 py-4 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-slate-800 outline-none transition-all mb-4 text-center text-xl tracking-widest"
+                placeholder="••••"
+              />
+              
+              <button 
+                onClick={handleAdminLogin}
+                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all"
+              >
+                입장하기
+              </button>
+              <p className="mt-4 text-xs text-slate-400">초기 비밀번호: 1234</p>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Dashboard View */}
+        {view === 'admin' && (
+          <div className={`${fadeClass} space-y-6`}>
+            <div className="flex justify-between items-end">
+              <div>
+                <h2 className="text-3xl font-bold text-slate-900">제출 현황 대시보드</h2>
+                <p className="text-slate-500 mt-1">총 {logs.length}건의 리포트가 제출되었습니다.</p>
+              </div>
+              <button 
+                onClick={() => setView('home')}
+                className="flex items-center gap-2 bg-rose-50 text-rose-600 px-4 py-2 rounded-xl font-semibold hover:bg-rose-100 transition-colors"
+              >
+                <LogOut size={18} /> 로그아웃
+              </button>
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+              <div className="p-6 border-b border-slate-50 flex items-center gap-3">
+                <Search size={20} className="text-slate-400" />
+                <input 
+                  placeholder="학생 이름 또는 학번으로 검색..." 
+                  className="bg-transparent outline-none w-full text-sm"
+                />
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                      <th className="px-6 py-4">일시</th>
+                      <th className="px-6 py-4">이름 / 학번</th>
+                      <th className="px-6 py-4">과제명</th>
+                      <th className="px-6 py-4">AI 사용여부</th>
+                      <th className="px-6 py-4">도구</th>
+                      <th className="px-6 py-4 text-right">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {logs.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-20 text-center text-slate-400">
+                          <div className="flex flex-col items-center gap-2">
+                            <ClipboardCheck size={48} strokeWidth={1} className="opacity-20" />
+                            <p>아직 제출된 리포트가 없습니다.</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      logs.map((log) => (
+                        <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
+                          <td className="px-6 py-4 text-xs text-slate-400 whitespace-nowrap">
+                            {log.date.split(',')[0]}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="font-bold text-slate-800">{log.name}</div>
+                            <div className="text-xs text-slate-500">{log.studentId}</div>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-medium">{log.assignment}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                              log.aiUsed === '사용함' 
+                              ? 'bg-amber-100 text-amber-700' 
+                              : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {log.aiUsed}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">{log.tool || '-'}</td>
+                          <td className="px-6 py-4 text-right">
+                            <button 
+                              onClick={() => deleteLog(log.id)}
+                              className="text-slate-300 hover:text-rose-500 transition-colors p-1"
+                            >
+                              삭제
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            {logs.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {logs.filter(l => l.aiUsed === '사용함').slice(0, 4).map(log => (
+                  <div key={log.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-xs font-bold text-indigo-500 uppercase">Usage Detail</span>
+                      <span className="text-xs text-slate-400">{log.name}</span>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
+                          <Wrench size={12} /> 사용 목적
+                        </h4>
+                        <p className="text-sm text-slate-700 line-clamp-2">{log.purpose || '미입력'}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
+                          <CheckCircle2 size={12} /> 반영 내용
+                        </h4>
+                        <p className="text-sm text-slate-700 line-clamp-2">{log.applied || '미입력'}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="mt-20 py-10 text-center border-t border-slate-200 text-slate-400 text-sm">
+        <p>© 2024 AI Usage Integrity System. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
