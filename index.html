@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 사용 기록 시스템</title>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f9;
+  margin:0;
+  padding:0;
+}
+header{
+  background:#1e2a38;
+  color:white;
+  padding:20px;
+  text-align:center;
+  font-size:20px;
+}
+.container{
+  padding:30px;
+  max-width:900px;
+  margin:auto;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  background:#1e2a38;
+  color:white;
+  cursor:pointer;
+  border-radius:5px;
+}
+input, textarea{
+  width:100%;
+  padding:8px;
+  margin:5px 0 15px 0;
+}
+.hidden{display:none;}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th, td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<header>
+생성형 AI 사용 기록 시스템
+</header>
+
+<div class="container">
+
+<div id="home">
+  <button onclick="showStudent()">학생 모드</button>
+  <button onclick="showProfessor()">교수 모드</button>
+</div>
+
+<div id="student" class="hidden">
+<h3>📘 생성형 AI 도구 활용 방침</h3>
+<p>AI는 사고를 대체하는 도구가 아닌 보조 수단입니다. 그대로 제출 시 낙제 처리됩니다.</p>
+<label><input type="checkbox" id="agree"> 위 내용을 이해했습니다.</label>
+
+<h3>기록 작성</h3>
+<input type="text" id="name" placeholder="이름">
+<input type="text" id="studentId" placeholder="학번">
+<input type="text" id="assignment" placeholder="과제명">
+
+<label>AI 사용 여부</label>
+<select id="aiUsed">
+  <option value="사용안함">사용안함</option>
+  <option value="사용함">사용함</option>
+</select>
+
+<input type="text" id="tool" placeholder="사용한 AI 도구">
+<textarea id="purpose" placeholder="사용 목적"></textarea>
+<textarea id="applied" placeholder="실제 반영 부분"></textarea>
+
+<button onclick="saveData()">제출</button>
+<button onclick="goHome()">뒤로가기</button>
+</div>
+
+<div id="professor" class="hidden">
+<h3>🔒 교수 모드</h3>
+<input type="password" id="password" placeholder="비밀번호 입력">
+<button onclick="checkPassword()">입장</button>
+
+<div id="adminPanel" class="hidden">
+<h3>제출 목록</h3>
+<table>
+<thead>
+<tr>
+<th>이름</th>
+<th>학번</th>
+<th>과제명</th>
+<th>AI사용</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+<button onclick="goHome()">뒤로가기</button>
+</div>
+</div>
+
+</div>
+
+<script>
+function showStudent(){
+  home.classList.add("hidden");
+  student.classList.remove("hidden");
+}
+function showProfessor(){
+  home.classList.add("hidden");
+  professor.classList.remove("hidden");
+}
+function goHome(){
+  location.reload();
+}
+
+function saveData(){
+  if(!agree.checked){
+    alert("방침에 동의해야 합니다.");
+    return;
+  }
+
+  let data = {
+    name:name.value,
+    studentId:studentId.value,
+    assignment:assignment.value,
+    aiUsed:aiUsed.value,
+    tool:tool.value,
+    purpose:purpose.value,
+    applied:applied.value
+  }
+
+  let logs = JSON.parse(localStorage.getItem("aiLogs")) || [];
+  logs.push(data);
+  localStorage.setItem("aiLogs", JSON.stringify(logs));
+  alert("제출 완료!");
+  location.reload();
+}
+
+function checkPassword(){
+  if(password.value === "1234"){
+    adminPanel.classList.remove("hidden");
+    loadTable();
+  }else{
+    alert("비밀번호 오류");
+  }
+}
+
+function loadTable(){
+  let logs = JSON.parse(localStorage.getItem("aiLogs")) || [];
+  let html="";
+  logs.forEach(l=>{
+    html+=`<tr>
+    <td>${l.name}</td>
+    <td>${l.studentId}</td>
+    <td>${l.assignment}</td>
+    <td>${l.aiUsed}</td>
+    </tr>`
+  });
+  tableBody.innerHTML = html;
+}
+</script>
+
+</body>
+</html>
