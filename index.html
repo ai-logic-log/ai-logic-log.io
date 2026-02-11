@@ -3,168 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 활용 학업 윤리 점검 시스템</title>
+    <title>AI Academic Integrity System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+KR:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; }
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body>
 
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden">
-        <header class="bg-indigo-600 text-white p-6">
-            <h1 class="text-2xl font-bold text-center">AI 활용 내역 신고 시스템</h1>
-            <p class="text-center text-indigo-100 mt-2 text-sm">비판적 사고를 위한 생성형 AI 활용 가이드라인 준수</p>
-        </header>
-
-        <div class="flex border-b">
-            <button onclick="openTab('student')" id="tab-student" class="flex-1 py-4 text-center font-semibold border-b-2 border-indigo-600 text-indigo-600 bg-indigo-50">학생 모드</button>
-            <button onclick="openTab('professor')" id="tab-professor" class="flex-1 py-4 text-center font-semibold border-b-2 border-transparent text-gray-500 hover:text-indigo-600">교수 모드 (관리자)</button>
+    <section id="view-main" class="view-section active min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <div class="mb-8 bg-indigo-600 text-white p-4 rounded-3xl shadow-lg">
+            <i class="fa-solid fa-microchip text-4xl"></i>
+        </div>
+        <h1 class="text-4xl font-extrabold text-slate-800 mb-4 leading-tight">
+            생성형 AI 활용<br><span class="text-indigo-600">학업 윤리 점검 시스템</span>
+        </h1>
+        <p class="text-slate-500 mb-10 max-w-md">
+            본 시스템은 AI를 사고의 보조 수단으로 활용하는 건강한 학문적 문화를 지향합니다. 여러분의 비판적 사유를 기록해주세요.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
+            <button onclick="showSection('view-student')" class="flex items-center justify-center gap-3 bg-white border-2 border-indigo-600 text-indigo-600 py-4 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-sm">
+                <i class="fa-solid fa-pen-to-square"></i> 학생용 기록 제출
+            </button>
+            <button onclick="checkAdmin()" class="flex items-center justify-center gap-3 bg-slate-800 text-white py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-sm">
+                <i class="fa-solid fa-user-tie"></i> 교수용 관리 모드
+            </button>
         </div>
 
-        <div class="p-6">
-            <div id="student" class="tab-content active space-y-4">
-                <h2 class="text-xl font-bold border-l-4 border-indigo-500 pl-3 mb-6">AI 활용 기록 제출</h2>
-                <form id="aiForm" class="grid grid-cols-1 gap-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">성명</label>
-                            <input type="text" id="name" required class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">학번</label>
-                            <input type="text" id="studentId" required class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">사용한 AI 도구</label>
-                        <select id="aiTool" class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm">
-                            <option>Gemini</option>
-                            <option>ChatGPT</option>
-                            <option>Claude</option>
-                            <option>기타</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">사용 목적 및 활용 과정</label>
-                        <textarea id="purpose" rows="3" placeholder="예: 주제 선정을 위한 브레인스토밍, 복잡한 구문 분석 보조 등" class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">실제 과제 반영 내용</label>
-                        <textarea id="reflection" rows="3" placeholder="생성된 내용 중 본인의 사유를 거쳐 실제 반영한 핵심 부분 기술" class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm"></textarea>
-                    </div>
-
-                    <div class="bg-amber-50 p-4 rounded-md border border-amber-200">
-                        <label class="flex items-start">
-                            <input type="checkbox" required class="mt-1 mr-2">
-                            <span class="text-xs text-amber-800 font-medium">
-                                본인은 AI의 답변을 그대로 복사하지 않았으며, 제출한 내용은 AI 도구를 보조 수단으로 활용하여 본인이 직접 작성하였음을 서약합니다. (위반 시 낙제점 부여 동의)
-                            </span>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-md font-bold hover:bg-indigo-700 transition">기록 제출하기</button>
-                </form>
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-4xl">
+            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                <span class="text-indigo-500 font-bold mb-2 block">01. 도구 명시</span>
+                <p class="text-xs text-slate-500">Gemini, ChatGPT 등 사용한 도구의 명칭을 정확히 기록합니다.</p>
             </div>
-
-            <div id="professor" class="tab-content space-y-4">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold border-l-4 border-red-500 pl-3">학생별 활용 내역 모니터링</h2>
-                    <button onclick="clearLogs()" class="text-xs text-red-500 hover:underline">데이터 초기화</button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">학번/성명</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용 도구</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">반영 요약</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">일시</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logTableBody" class="bg-white divide-y divide-gray-200">
-                            </tbody>
-                    </table>
-                </div>
+            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                <span class="text-indigo-500 font-bold mb-2 block">02. 활용 과정</span>
+                <p class="text-xs text-slate-500">아이디어 탐색, 자료 분석 등 구체적인 활용 목적을 기술합니다.</p>
+            </div>
+            <div class="bg-white p-5 rounded-xl border border-slate-200">
+                <span class="text-indigo-500 font-bold mb-2 block">03. 비판적 반영</span>
+                <p class="text-xs text-slate-500">AI가 생성한 답변 중 본인이 직접 선별하고 재구성한 내용을 기록합니다.</p>
             </div>
         </div>
-    </div>
+    </section>
+
+    <section id="view-student" class="view-section max-w-2xl mx-auto my-10 p-6 bg-white shadow-2xl rounded-3xl">
+        <div class="flex justify-between items-center mb-8">
+            <button onclick="showSection('view-main')" class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+            <h2 class="text-2xl font-bold text-slate-800">활용 내역 제출</h2>
+            <div class="w-8"></div>
+        </div>
+
+        <form id="aiForm" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-sm font-semibold text-slate-600 ml-1">이름</label>
+                    <input type="text" id="name" required class="w-full bg-slate-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-sm font-semibold text-slate-600 ml-1">학번</label>
+                    <input type="text" id="studentId" required class="w-full bg-slate-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-sm font-semibold text-slate-600 ml-1">사용한 AI 도구</label>
+                <select id="aiTool" class="w-full bg-slate-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                    <option>Gemini 1.5 Pro</option>
+                    <option>ChatGPT-4o</option>
+                    <option>Claude 3.5 Sonnet</option>
+                    <option>Perplexity</option>
+                    <option>기타</option>
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-sm font-semibold text-slate-600 ml-1">활용 목적 및 과정</label>
+                <textarea id="purpose" rows="3" required placeholder="예: 영문학 분석을 위한 텍스트 요약 및 배경지식 검색" class="w-full bg-slate-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition"></textarea>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-sm font-semibold text-slate-600 ml-1">실제 과제 반영 내용</label>
+                <textarea id="reflection" rows="3" required placeholder="AI의 결과물 중 본인이 비판적으로 수용한 부분" class="w-full bg-slate-50 border-0 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none transition"></textarea>
+            </div>
+
+            <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" required class="mt-1 w-4 h-4 text-indigo-600 rounded">
+                    <span class="text-xs text-indigo-700 leading-relaxed font-medium">
+                        본인은 AI를 보조 도구로만 활용하였으며, AI 답변을 그대로 복사하여 제출하는 것이 학업 윤리에 위배됨을 인지하고 있습니다.
+                    </span>
+                </label>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all">제출 완료</button>
+        </form>
+    </section>
+
+    <section id="view-professor" class="view-section max-w-5xl mx-auto my-10 p-6">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-slate-800">수업 모니터링 대시보드</h2>
+            <button onclick="showSection('view-main')" class="bg-white px-4 py-2 rounded-xl border text-sm font-medium hover:bg-slate-50">로그아웃</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-sm mb-1">총 제출 인원</p>
+                <h3 id="stat-count" class="text-3xl font-bold text-indigo-600">0명</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-sm mb-1">최다 활용 도구</p>
+                <h3 id="stat-tool" class="text-3xl font-bold text-emerald-500">-</h3>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <p class="text-slate-400 text-sm mb-1">윤리 위반 의심</p>
+                <h3 class="text-3xl font-bold text-slate-300">0건</h3>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100">
+                        <th class="p-4 text-sm font-semibold text-slate-600">이름(학번)</th>
+                        <th class="p-4 text-sm font-semibold text-slate-600">도구</th>
+                        <th class="p-4 text-sm font-semibold text-slate-600">반영 요약</th>
+                        <th class="p-4 text-sm font-semibold text-slate-600 text-center">제출일시</th>
+                    </tr>
+                </thead>
+                <tbody id="logTableBody" class="divide-y divide-slate-50">
+                    </tbody>
+            </table>
+        </div>
+    </section>
 
     <script>
-        // 탭 전환 함수
-        function openTab(tabName) {
-            const contents = document.getElementsByClassName('tab-content');
-            const tabs = document.querySelectorAll('div.flex button');
-            
-            for (let content of contents) content.classList.remove('active');
-            for (let tab of tabs) {
-                tab.classList.remove('text-indigo-600', 'border-indigo-600', 'bg-indigo-50');
-                tab.classList.add('text-gray-500', 'border-transparent');
-            }
-
-            document.getElementById(tabName).classList.add('active');
-            const activeTab = document.getElementById('tab-' + tabName);
-            activeTab.classList.remove('text-gray-500', 'border-transparent');
-            activeTab.classList.add('text-indigo-600', 'border-indigo-600', 'bg-indigo-50');
-
-            if(tabName === 'professor') renderLogs();
+        function showSection(sectionId) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if(sectionId === 'view-professor') renderLogs();
         }
 
-        // 데이터 저장
+        function checkAdmin() {
+            const pw = prompt("교수 모드 비밀번호를 입력하세요 (기본: 1234)");
+            if(pw === "1234") {
+                showSection('view-professor');
+            } else {
+                alert("비밀번호가 틀렸습니다.");
+            }
+        }
+
         document.getElementById('aiForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const logEntry = {
                 name: document.getElementById('name').value,
                 studentId: document.getElementById('studentId').value,
                 aiTool: document.getElementById('aiTool').value,
                 purpose: document.getElementById('purpose').value,
                 reflection: document.getElementById('reflection').value,
-                timestamp: new Date().toLocaleString()
+                timestamp: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             };
 
-            const logs = JSON.parse(localStorage.getItem('ai_logs') || '[]');
+            const logs = JSON.parse(localStorage.getItem('ai_academic_logs') || '[]');
             logs.push(logEntry);
-            localStorage.setItem('ai_logs', JSON.stringify(logs));
+            localStorage.setItem('ai_academic_logs', JSON.stringify(logs));
 
-            alert('기록이 성공적으로 제출되었습니다.');
+            alert('학업 윤리 서약 및 기록이 제출되었습니다.');
+            showSection('view-main');
             this.reset();
         });
 
-        // 데이터 불러오기 (교수 모드)
         function renderLogs() {
-            const logs = JSON.parse(localStorage.getItem('ai_logs') || '[]');
+            const logs = JSON.parse(localStorage.getItem('ai_academic_logs') || '[]');
             const tbody = document.getElementById('logTableBody');
-            tbody.innerHTML = '';
+            const statCount = document.getElementById('stat-count');
+            const statTool = document.getElementById('stat-tool');
 
-            if(logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 text-sm">제출된 내역이 없습니다.</td></tr>';
-                return;
+            statCount.innerText = `${logs.length}명`;
+            
+            // 통계 계산
+            if(logs.length > 0) {
+                const tools = logs.map(l => l.aiTool);
+                const mostUsed = tools.sort((a,b) => tools.filter(v => v===a).length - tools.filter(v => v===b).length).pop();
+                statTool.innerText = mostUsed;
             }
+
+            tbody.innerHTML = logs.length === 0 
+                ? '<tr><td colspan="4" class="p-10 text-center text-slate-400">제출된 데이터가 없습니다.</td></tr>' 
+                : '';
 
             logs.reverse().forEach(log => {
-                const row = `<tr>
-                    <td class="px-4 py-4 whitespace-nowrap"><div class="text-sm font-medium text-gray-900">${log.name}</div><div class="text-xs text-gray-500">${log.studentId}</div></td>
-                    <td class="px-4 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${log.aiTool}</span></td>
-                    <td class="px-4 py-4 text-sm text-gray-500">${log.reflection.substring(0, 20)}...</td>
-                    <td class="px-4 py-4 whitespace-nowrap text-xs text-gray-500">${log.timestamp}</td>
-                </tr>`;
+                const row = `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4">
+                            <div class="font-bold text-slate-700">${log.name}</div>
+                            <div class="text-xs text-slate-400">${log.studentId}</div>
+                        </td>
+                        <td class="p-4 text-sm"><span class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-lg font-medium">${log.aiTool}</span></td>
+                        <td class="p-4 text-sm text-slate-600">
+                            <details class="cursor-pointer">
+                                <summary class="text-indigo-500 font-semibold underline">내용 확인</summary>
+                                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-xs leading-relaxed">
+                                    <strong>목적:</strong> ${log.purpose}<br>
+                                    <strong>반영:</strong> ${log.reflection}
+                                </div>
+                            </details>
+                        </td>
+                        <td class="p-4 text-xs text-slate-400 text-center">${log.timestamp}</td>
+                    </tr>
+                `;
                 tbody.innerHTML += row;
             });
-        }
-
-        function clearLogs() {
-            if(confirm('모든 기록을 삭제하시겠습니까?')) {
-                localStorage.removeItem('ai_logs');
-                renderLogs();
-            }
         }
     </script>
 </body>
