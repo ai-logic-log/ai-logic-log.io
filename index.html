@@ -1,260 +1,175 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Academic Integrity System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; }
-        
-        /* 화면 전환용 스타일: active 클래스가 있어야만 보임 */
-        .page-section { display: none; }
-        .page-section.active { display: block !important; animation: fadeIn 0.3s ease-in-out; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 사용 기록 시스템</title>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f9;
+  margin:0;
+  padding:0;
+}
+header{
+  background:#1e2a38;
+  color:white;
+  padding:20px;
+  text-align:center;
+  font-size:20px;
+}
+.container{
+  padding:30px;
+  max-width:900px;
+  margin:auto;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  background:#1e2a38;
+  color:white;
+  cursor:pointer;
+  border-radius:5px;
+}
+input, textarea{
+  width:100%;
+  padding:8px;
+  margin:5px 0 15px 0;
+}
+.hidden{display:none;}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th, td{
+  border:1px solid #ccc;
+  padding:8px;
+  text-align:center;
+}
+</style>
 </head>
 <body>
 
-    <section id="page-home" class="page-section active min-h-screen flex items-center justify-center p-6">
-        <div class="max-w-2xl w-full text-center bg-white p-10 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100">
-            <div class="inline-block mb-8 bg-indigo-600 text-white p-6 rounded-3xl shadow-xl">
-                <i class="fa-solid fa-feather-pointed text-4xl"></i>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4 leading-tight">
-                AI 활용<br><span class="text-indigo-600">학업 윤리 점검 시스템</span>
-            </h1>
-            <p class="text-slate-500 mb-12 text-lg">본인의 역할에 맞는 모드를 선택하세요.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <button type="button" onclick="navTo('page-student')" class="group p-8 border-2 border-indigo-50 rounded-3xl hover:border-indigo-600 hover:bg-indigo-50 transition-all text-center shadow-sm">
-                    <i class="fa-solid fa-user-graduate text-4xl text-indigo-600 mb-4 group-hover:scale-110 transition"></i>
-                    <h3 class="text-xl font-bold text-slate-800">학생용</h3>
-                    <p class="text-sm text-slate-400 mt-2">AI 활용 기록 제출</p>
-                </button>
-                <button type="button" onclick="checkAdminPassword()" class="group p-8 border-2 border-slate-50 rounded-3xl hover:border-slate-800 hover:bg-slate-50 transition-all text-center shadow-sm">
-                    <i class="fa-solid fa-user-tie text-4xl text-slate-700 mb-4 group-hover:scale-110 transition"></i>
-                    <h3 class="text-xl font-bold text-slate-800">교수용</h3>
-                    <p class="text-sm text-slate-400 mt-2">제출 내역 모니터링</p>
-                </button>
-            </div>
-        </div>
-    </section>
+<header>
+생성형 AI 사용 기록 시스템
+</header>
 
-    <section id="page-student" class="page-section min-h-screen p-6">
-        <div class="max-w-2xl mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden mt-6 mb-10 border border-slate-100">
-            <div class="bg-indigo-600 p-8 text-white flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-bold">활용 내역 제출</h2>
-                    <p class="text-indigo-100 text-sm mt-1">학업 윤리 가이드를 준수해 주세요.</p>
-                </div>
-                <button type="button" onclick="navTo('page-home')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-semibold transition">뒤로가기</button>
-            </div>
-            
-            <form id="aiSubmitForm" class="p-8 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-slate-700 ml-1">성명</label>
-                        <input type="text" id="stuName" required placeholder="이재성" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-bold text-slate-700 ml-1">학번</label>
-                        <input type="text" id="stuId" required placeholder="2100036" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                    </div>
-                </div>
+<div class="container">
 
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-slate-700 ml-1">사용한 AI 도구</label>
-                    <select id="stuTool" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none appearance-none">
-                        <option>Gemini (Google)</option>
-                        <option>ChatGPT (OpenAI)</option>
-                        <option>Claude (Anthropic)</option>
-                        <option>기타</option>
-                    </select>
-                </div>
+<div id="home">
+  <button onclick="showStudent()">학생 모드</button>
+  <button onclick="showProfessor()">교수 모드</button>
+</div>
 
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-slate-700 ml-1">활용 목적 및 과정</label>
-                    <textarea id="stuPurpose" rows="3" required placeholder="예: 영문학 텍스트 분석 및 문장 구조 파악 보조" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition"></textarea>
-                </div>
+<div id="student" class="hidden">
+<h3>📘 생성형 AI 도구 활용 방침</h3>
+<p>AI는 사고를 대체하는 도구가 아닌 보조 수단입니다. 그대로 제출 시 낙제 처리됩니다.</p>
+<label><input type="checkbox" id="agree"> 위 내용을 이해했습니다.</label>
 
-                <div class="space-y-2">
-                    <label class="block text-sm font-bold text-slate-700 ml-1">실제 과제 반영 내용</label>
-                    <textarea id="stuReflect" rows="3" required placeholder="AI의 답변을 어떻게 비판적으로 수용하고 재구성했는지 기록하세요." class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none resize-none transition"></textarea>
-                </div>
+<h3>기록 작성</h3>
+<input type="text" id="name" placeholder="이름">
+<input type="text" id="studentId" placeholder="학번">
+<input type="text" id="assignment" placeholder="과제명">
 
-                <div class="p-5 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4">
-                    <input type="checkbox" required class="mt-1 w-6 h-6 accent-indigo-600 cursor-pointer">
-                    <span class="text-xs text-amber-800 leading-relaxed font-semibold">
-                        본인은 AI를 비판적 사고를 위한 보조 도구로만 활용하였으며, AI가 생성한 내용을 그대로 복사하여 제출하는 행위가 학업 윤리에 위배됨을 인지하고 있습니다.
-                    </span>
-                </div>
+<label>AI 사용 여부</label>
+<select id="aiUsed">
+  <option value="사용안함">사용안함</option>
+  <option value="사용함">사용함</option>
+</select>
 
-                <button type="submit" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold text-lg shadow-xl hover:bg-indigo-700 transition-all active:scale-[0.98]">
-                    기록 제출하기
-                </button>
-            </form>
-        </div>
-    </section>
+<input type="text" id="tool" placeholder="사용한 AI 도구">
+<textarea id="purpose" placeholder="사용 목적"></textarea>
+<textarea id="applied" placeholder="실제 반영 부분"></textarea>
 
-    <section id="page-professor" class="page-section min-h-screen p-6">
-        <div class="max-w-5xl mx-auto mt-6">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-                <div>
-                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Monitoring Dashboard</h2>
-                    <p class="text-slate-500 mt-1">실시간 AI 활용 신고 내역입니다.</p>
-                </div>
-                <div class="flex gap-3">
-                    <button type="button" onclick="clearLogs()" class="bg-red-50 text-red-600 px-5 py-2.5 rounded-xl font-bold hover:bg-red-100 transition">데이터 초기화</button>
-                    <button type="button" onclick="navTo('page-home')" class="bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-slate-900 transition">로그아웃</button>
-                </div>
-            </div>
+<button onclick="saveData()">제출</button>
+<button onclick="goHome()">뒤로가기</button>
+</div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div class="bg-white p-8 rounded-[2rem] shadow-lg border border-slate-100">
-                    <p class="text-slate-400 text-xs font-bold uppercase mb-2">Total Reports</p>
-                    <h4 id="statTotal" class="text-5xl font-black text-indigo-600">0</h4>
-                </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-lg border border-slate-100">
-                    <p class="text-slate-400 text-xs font-bold uppercase mb-2">Trend Tool</p>
-                    <h4 id="statTool" class="text-5xl font-black text-emerald-500">-</h4>
-                </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-lg border border-slate-100">
-                    <p class="text-slate-400 text-xs font-bold uppercase mb-2">Service Status</p>
-                    <h4 class="text-5xl font-black text-slate-200">LIVE</h4>
-                </div>
-            </div>
+<div id="professor" class="hidden">
+<h3>🔒 교수 모드</h3>
+<input type="password" id="password" placeholder="비밀번호 입력">
+<button onclick="checkPassword()">입장</button>
 
-            <div class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th class="p-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
-                                <th class="p-6 text-xs font-bold text-slate-500 uppercase tracking-wider">AI Tool</th>
-                                <th class="p-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Details</th>
-                                <th class="p-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Submitted At</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logList" class="divide-y divide-slate-50">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
+<div id="adminPanel" class="hidden">
+<h3>제출 목록</h3>
+<table>
+<thead>
+<tr>
+<th>이름</th>
+<th>학번</th>
+<th>과제명</th>
+<th>AI사용</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+<button onclick="goHome()">뒤로가기</button>
+</div>
+</div>
 
-    <script>
-        // 화면 전환 함수: 'active' 클래스만 제어
-        function navTo(pageId) {
-            console.log("Navigating to:", pageId); // 디버깅용 로그
-            const sections = document.querySelectorAll('.page-section');
-            sections.forEach(s => s.classList.remove('active'));
-            
-            const target = document.getElementById(pageId);
-            if (target) {
-                target.classList.add('active');
-                window.scrollTo(0, 0);
-            }
+</div>
 
-            if(pageId === 'page-professor') updateProfessorView();
-        }
+<script>
+function showStudent(){
+  home.classList.add("hidden");
+  student.classList.remove("hidden");
+}
+function showProfessor(){
+  home.classList.add("hidden");
+  professor.classList.remove("hidden");
+}
+function goHome(){
+  location.reload();
+}
 
-        // 비밀번호 확인 (교수용)
-        function checkAdminPassword() {
-            const pw = prompt("관리자 비밀번호를 입력하세요 (기본: 1234)");
-            if(pw === "1234") navTo('page-professor');
-            else if(pw !== null) alert("접근 권한이 없습니다.");
-        }
+function saveData(){
+  if(!agree.checked){
+    alert("방침에 동의해야 합니다.");
+    return;
+  }
 
-        // 학생 제출 이벤트
-        document.getElementById('aiSubmitForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // 페이지 새로고침 방지
-            
-            const submission = {
-                name: document.getElementById('stuName').value,
-                id: document.getElementById('stuId').value,
-                tool: document.getElementById('stuTool').value,
-                purpose: document.getElementById('stuPurpose').value,
-                reflect: document.getElementById('stuReflect').value,
-                time: new Date().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-            };
+  let data = {
+    name:name.value,
+    studentId:studentId.value,
+    assignment:assignment.value,
+    aiUsed:aiUsed.value,
+    tool:tool.value,
+    purpose:purpose.value,
+    applied:applied.value
+  }
 
-            // 데이터 저장 (LocalStorage)
-            let logs = JSON.parse(localStorage.getItem('contest_ai_logs') || '[]');
-            logs.push(submission);
-            localStorage.setItem('contest_ai_logs', JSON.stringify(logs));
+  let logs = JSON.parse(localStorage.getItem("aiLogs")) || [];
+  logs.push(data);
+  localStorage.setItem("aiLogs", JSON.stringify(logs));
+  alert("제출 완료!");
+  location.reload();
+}
 
-            alert("제출이 완료되었습니다. 홈으로 이동합니다.");
-            this.reset();
-            navTo('page-home');
-        });
+function checkPassword(){
+  if(password.value === "1234"){
+    adminPanel.classList.remove("hidden");
+    loadTable();
+  }else{
+    alert("비밀번호 오류");
+  }
+}
 
-        // 교수용 대시보드 업데이트
-        function updateProfessorView() {
-            const logs = JSON.parse(localStorage.getItem('contest_ai_logs') || '[]');
-            const list = document.getElementById('logList');
-            const statTotal = document.getElementById('statTotal');
-            const statTool = document.getElementById('statTool');
+function loadTable(){
+  let logs = JSON.parse(localStorage.getItem("aiLogs")) || [];
+  let html="";
+  logs.forEach(l=>{
+    html+=`<tr>
+    <td>${l.name}</td>
+    <td>${l.studentId}</td>
+    <td>${l.assignment}</td>
+    <td>${l.aiUsed}</td>
+    </tr>`
+  });
+  tableBody.innerHTML = html;
+}
+</script>
 
-            statTotal.innerText = logs.length;
-            list.innerHTML = '';
-
-            if(logs.length === 0) {
-                list.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-300 font-medium italic">No data submitted yet.</td></tr>';
-                statTool.innerText = '-';
-                return;
-            }
-
-            // 가장 많이 쓴 도구 계산
-            const counts = logs.reduce((acc, curr) => {
-                acc[curr.tool] = (acc[curr.tool] || 0) + 1;
-                return acc;
-            }, {});
-            const top = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-            statTool.innerText = top.split(' ')[0];
-
-            // 리스트 출력 (최신순)
-            logs.slice().reverse().forEach(log => {
-                const row = `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-6">
-                            <div class="font-bold text-slate-800">${log.name}</div>
-                            <div class="text-xs text-slate-400 font-semibold tracking-wide">${log.id}</div>
-                        </td>
-                        <td class="p-6">
-                            <span class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-xl text-xs font-bold border border-indigo-100">${log.tool}</span>
-                        </td>
-                        <td class="p-6">
-                            <details class="group cursor-pointer">
-                                <summary class="text-sm font-bold text-indigo-500 outline-none list-none flex items-center gap-1">
-                                    View Details <i class="fa-solid fa-caret-down group-open:rotate-180 transition"></i>
-                                </summary>
-                                <div class="mt-4 p-5 bg-slate-50 rounded-2xl text-xs border border-slate-100 shadow-inner leading-relaxed text-slate-600">
-                                    <p class="font-bold text-slate-800 mb-1">■ 활용 목적</p>
-                                    <p class="mb-4">${log.purpose}</p>
-                                    <p class="font-bold text-slate-800 mb-1">■ 비판적 반영</p>
-                                    <p>${log.reflect}</p>
-                                </div>
-                            </details>
-                        </td>
-                        <td class="p-6 text-xs text-slate-400 font-bold">${log.time}</td>
-                    </tr>
-                `;
-                list.innerHTML += row;
-            });
-        }
-
-        // 초기화 함수
-        function clearLogs() {
-            if(confirm("모든 데이터를 삭제하시겠습니까? 공모전 시연 중이라면 주의하세요!")) {
-                localStorage.removeItem('contest_ai_logs');
-                updateProfessorView();
-            }
-        }
-    </script>
 </body>
 </html>
+
